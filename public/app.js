@@ -1,24 +1,29 @@
 'use strict';
 
-const UP = '#FF3232';
-const DOWN = '#00FFFF';
-const MA_DEFS = [[5, '#FFFFFF'], [10, '#FFFF00'], [20, '#FF00FF'], [30, '#00FF00'], [60, '#A0A0A0'], [120, '#00C8FF'], [250, '#C8C800']];
-const OVERLAY_COLORS = ['#FFFFFF', '#FFD700', '#FF4FD8', '#3CFF6B', '#3FA9FF'];
+const T = {
+  bg: '#FFFFFF', axis: '#F4B6CF', grid: '#FBE3EE', label: '#9C8AA5', strong: '#6B5876',
+  pointer: '#C9A3E0', pointerBg: '#B57EDC', hollow: '#FFFFFF',
+  slider: '#FFD1E3', sliderFill: 'rgba(255,143,186,0.25)', handle: '#FF8FBA',
+};
+const UP = '#FF5C93';
+const DOWN = '#2EC4A6';
+const MA_DEFS = [[5, '#7B61FF'], [10, '#FFA41B'], [20, '#FF4FA3'], [30, '#1FB89A'], [60, '#9AA0C0'], [120, '#3D9BFF'], [250, '#C08AE0']];
+const OVERLAY_COLORS = ['#FF4FA3', '#7B61FF', '#FFA41B', '#1FB89A', '#3D9BFF'];
 const PRESETS = [['1M', '1个月'], ['3M', '3个月'], ['6M', '6个月'], ['YTD', '今年'], ['1Y', '1年'], ['2Y', '2年']];
 const MAX_COMPARE = 5;
 const WEEK = '日一二三四五六';
 
 const RICH = {
-  name: { color: '#FFFF00', fontSize: 13, fontWeight: 'bold' },
-  code: { color: '#999', fontSize: 12 },
-  lab: { color: '#aaa', fontSize: 12 },
+  name: { color: '#E8508E', fontSize: 14, fontWeight: 'bold' },
+  code: { color: '#B9A8C4', fontSize: 12 },
+  lab: { color: '#9C8AA5', fontSize: 12 },
   up: { color: UP, fontSize: 12 },
   dn: { color: DOWN, fontSize: 12 },
-  eq: { color: '#ddd', fontSize: 12 },
-  hol: { color: '#000', backgroundColor: '#ffcc00', padding: [1, 4], fontSize: 12 },
-  vol: { color: '#ddd', fontSize: 12 },
-  mv1: { color: '#FFFF00', fontSize: 12 },
-  mv2: { color: '#FF00FF', fontSize: 12 },
+  eq: { color: '#6B5876', fontSize: 12 },
+  hol: { color: '#fff', backgroundColor: '#C08AE0', padding: [2, 6], borderRadius: 8, fontSize: 12 },
+  vol: { color: '#6B5876', fontSize: 12 },
+  mv1: { color: '#FFA41B', fontSize: 12 },
+  mv2: { color: '#7B61FF', fontSize: 12 },
 };
 MA_DEFS.forEach(([, c], j) => { RICH['m' + j] = { color: c, fontSize: 12 }; });
 
@@ -121,7 +126,7 @@ function createKChart(el, ix, axis, opt) {
     if (k < 0) return '-';
     const r = D.rows[k];
     const up = r[4] >= r[1];
-    return { value: r[5], itemStyle: up ? { color: '#000', borderColor: UP, borderWidth: 1 } : { color: DOWN, borderColor: DOWN } };
+    return { value: r[5], itemStyle: up ? { color: T.hollow, borderColor: UP, borderWidth: 1 } : { color: DOWN, borderColor: DOWN } };
   });
   const pick = (arr) => at.map((k) => (k < 0 || arr[k] == null ? null : +arr[k].toFixed(2)));
 
@@ -165,7 +170,7 @@ function createKChart(el, ix, axis, opt) {
       return {
         coord: [i, v], symbol: 'circle', symbolSize: 1,
         label: {
-          show: true, color: '#fff', fontSize: 12,
+          show: true, color: '#E8508E', fontSize: 12, fontWeight: 'bold',
           position: right ? 'left' : 'right', distance: 2,
           offset: [0, isHigh ? -2 : 2],
           formatter: right ? `${f2(v)} →` : `← ${f2(v)}`,
@@ -177,20 +182,20 @@ function createKChart(el, ix, axis, opt) {
 
   const [s0, e0] = opt.range;
   const bottom = opt.slider ? 44 : 22;
-  const axisLine = { lineStyle: { color: '#8B0000' } };
-  const split = { show: true, lineStyle: { color: '#2b0f0f', type: 'dashed' } };
+  const axisLine = { lineStyle: { color: T.axis } };
+  const split = { show: true, lineStyle: { color: T.grid, type: 'dashed' } };
 
   chart.setOption({
-    backgroundColor: '#000',
+    backgroundColor: T.bg,
     animation: false,
     title: [
       { id: 'pinfo', left: 8, top: 4, text: priceText(lastReal(e0)), textStyle: { rich: RICH, lineHeight: 18 } },
       { id: 'vinfo', left: 8, top: '67%', text: volText(lastReal(e0)), textStyle: { rich: RICH } },
     ],
-    axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: '#333', color: '#fff' } },
+    axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: T.pointerBg, color: '#fff', borderRadius: 6 } },
     tooltip: {
       trigger: 'axis', showContent: false,
-      axisPointer: { type: 'cross', lineStyle: { color: '#aaa', type: 'dashed' }, crossStyle: { color: '#aaa', type: 'dashed' } },
+      axisPointer: { type: 'cross', lineStyle: { color: T.pointer, type: 'dashed' }, crossStyle: { color: T.pointer, type: 'dashed' } },
     },
     grid: [
       { left: 8, right: 64, top: 46, bottom: '34%' },
@@ -198,25 +203,25 @@ function createKChart(el, ix, axis, opt) {
     ],
     xAxis: [
       { type: 'category', data: axis, gridIndex: 0, axisLine, axisTick: { show: false }, axisLabel: { show: false }, axisPointer: { label: { show: false } } },
-      { type: 'category', data: axis, gridIndex: 1, axisLine, axisTick: { show: false }, axisLabel: { color: '#999' } },
+      { type: 'category', data: axis, gridIndex: 1, axisLine, axisTick: { show: false }, axisLabel: { color: T.label } },
     ],
     yAxis: [
-      { scale: true, gridIndex: 0, position: 'right', splitNumber: 6, axisLine: { show: true, ...axisLine }, axisLabel: { color: '#ccc' }, splitLine: split },
-      { gridIndex: 1, position: 'right', splitNumber: 2, axisLine: { show: true, ...axisLine }, axisLabel: { color: '#999', formatter: (v) => fmtVol(v, 1) }, splitLine: split },
+      { scale: true, gridIndex: 0, position: 'right', splitNumber: 6, axisLine: { show: true, ...axisLine }, axisLabel: { color: T.strong }, splitLine: split },
+      { gridIndex: 1, position: 'right', splitNumber: 2, axisLine: { show: true, ...axisLine }, axisLabel: { color: T.label, formatter: (v) => fmtVol(v, 1) }, splitLine: split },
     ],
     dataZoom: [
       { type: 'inside', xAxisIndex: [0, 1], startValue: s0, endValue: e0, minValueSpan: 10 },
       ...(opt.slider ? [{
         type: 'slider', xAxisIndex: [0, 1], startValue: s0, endValue: e0, bottom: 6, height: 20,
-        borderColor: '#333', fillerColor: 'rgba(122,0,0,0.35)', textStyle: { color: '#888' },
-        dataBackground: { lineStyle: { color: '#555' }, areaStyle: { color: '#222' } },
-        handleStyle: { color: '#7a0000' }, moveHandleStyle: { color: '#7a0000' },
+        borderColor: T.slider, fillerColor: T.sliderFill, textStyle: { color: T.label },
+        dataBackground: { lineStyle: { color: '#E7A9C6' }, areaStyle: { color: '#FDECF3' } },
+        handleStyle: { color: T.handle, borderColor: T.handle }, moveHandleStyle: { color: T.handle },
       }] : []),
     ],
     series: [
       {
         id: 'k', name: ix.name, type: 'candlestick', data: candle, barMaxWidth: 14,
-        itemStyle: { color: '#000', color0: DOWN, borderColor: UP, borderColor0: DOWN, borderWidth: 1 },
+        itemStyle: { color: T.hollow, color0: DOWN, borderColor: UP, borderColor0: DOWN, borderWidth: 1 },
         markPoint: { data: marks(s0, e0), animation: false },
       },
       ...MA_DEFS.map(([n, c], j) => ({
@@ -224,8 +229,8 @@ function createKChart(el, ix, axis, opt) {
         lineStyle: { width: 1, color: c }, itemStyle: { color: c }, silent: true,
       })),
       { name: 'VOL', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: vol, barMaxWidth: 14 },
-      { name: 'MAVOL1', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: pick(D.mv5), symbol: 'none', connectNulls: true, lineStyle: { width: 1, color: '#FFFF00' }, silent: true },
-      { name: 'MAVOL2', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: pick(D.mv10), symbol: 'none', connectNulls: true, lineStyle: { width: 1, color: '#FF00FF' }, silent: true },
+      { name: 'MAVOL1', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: pick(D.mv5), symbol: 'none', connectNulls: true, lineStyle: { width: 1, color: '#FFA41B' }, silent: true },
+      { name: 'MAVOL2', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: pick(D.mv10), symbol: 'none', connectNulls: true, lineStyle: { width: 1, color: '#7B61FF' }, silent: true },
       // 每天都有值的隐藏序列，用来在休市日也能定位十字光标
       { id: 'cursor', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: axis.map(() => 0), symbol: 'none', silent: true, lineStyle: { opacity: 0 } },
     ],
@@ -301,32 +306,32 @@ function createOverlay(el, list, axis, opt) {
 
   const [s0, e0] = opt.range;
   compute(s0, e0);
-  const axisLine = { lineStyle: { color: '#8B0000' } };
-  const split = { show: true, lineStyle: { color: '#2b0f0f', type: 'dashed' } };
+  const axisLine = { lineStyle: { color: T.axis } };
+  const split = { show: true, lineStyle: { color: T.grid, type: 'dashed' } };
 
   chart.setOption({
-    backgroundColor: '#000',
+    backgroundColor: T.bg,
     animation: false,
-    legend: { top: 8, left: 8, textStyle: { color: '#ddd' }, itemWidth: 18, itemHeight: 3, data: items.map((it) => it.ix.name) },
+    legend: { top: 8, left: 8, textStyle: { color: T.strong }, itemWidth: 18, itemHeight: 4, data: items.map((it) => it.ix.name) },
     title: [
-      { text: '区间累计涨跌幅（区间第一天 = 0%）', right: 72, top: 8, textStyle: { color: '#888', fontSize: 12, fontWeight: 'normal' } },
-      { text: '成交量 ÷ 区间日均成交量（1.0 = 平均水平）', left: 8, top: '67%', textStyle: { color: '#888', fontSize: 12, fontWeight: 'normal' } },
+      { text: '区间累计涨跌幅（区间第一天 = 0%）', right: 72, top: 8, textStyle: { color: T.label, fontSize: 12, fontWeight: 'normal' } },
+      { text: '成交量 ÷ 区间日均成交量（1.0 = 平均水平）', left: 8, top: '67%', textStyle: { color: T.label, fontSize: 12, fontWeight: 'normal' } },
     ],
-    axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: '#333', color: '#fff' } },
+    axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: T.pointerBg, color: '#fff', borderRadius: 6 } },
     tooltip: {
-      trigger: 'axis', backgroundColor: 'rgba(20,20,20,0.92)', borderColor: '#555', textStyle: { color: '#ddd', fontSize: 12 },
-      axisPointer: { type: 'cross', lineStyle: { color: '#aaa', type: 'dashed' }, crossStyle: { color: '#aaa', type: 'dashed' } },
+      trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.96)', borderColor: '#F7C6DA', borderWidth: 1, extraCssText: 'border-radius:14px;box-shadow:0 6px 20px rgba(232,80,142,.18);', textStyle: { color: T.strong, fontSize: 12 },
+      axisPointer: { type: 'cross', lineStyle: { color: T.pointer, type: 'dashed' }, crossStyle: { color: T.pointer, type: 'dashed' } },
       formatter(params) {
         const i = params[0].dataIndex;
         let h = `<b>${axis[i]} 周${weekday(axis[i])}</b><table style="margin-top:4px">`;
         items.forEach(({ ix, at, ff, color }, j) => {
           const p = pct[j][i];
-          const c = p == null ? '#ddd' : p >= 0 ? UP : DOWN;
-          const hol = at[i] < 0 ? ' <span style="color:#ffcc00">休市</span>' : '';
+          const c = p == null ? T.strong : p >= 0 ? UP : DOWN;
+          const hol = at[i] < 0 ? ' <span style="color:#C08AE0">休市</span>' : '';
           h += `<tr><td><span style="color:${color}">●</span> ${ix.name}</td>`
             + `<td style="text-align:right;color:${c};padding-left:12px">${p == null ? '-' : (p >= 0 ? '+' : '') + p.toFixed(2) + '%'}</td>`
             + `<td style="text-align:right;padding-left:12px">${f2(ff[i])}${hol}</td>`
-            + `<td style="text-align:right;padding-left:12px;color:#999">量比 ${ratio[j][i] == null ? '-' : ratio[j][i].toFixed(2)}</td></tr>`;
+            + `<td style="text-align:right;padding-left:12px;color:#9C8AA5">量比 ${ratio[j][i] == null ? '-' : ratio[j][i].toFixed(2)}</td></tr>`;
         });
         return h + '</table>';
       },
@@ -337,31 +342,31 @@ function createOverlay(el, list, axis, opt) {
     ],
     xAxis: [
       { type: 'category', data: axis, gridIndex: 0, axisLine, axisTick: { show: false }, axisLabel: { show: false }, axisPointer: { label: { show: false } } },
-      { type: 'category', data: axis, gridIndex: 1, axisLine, axisTick: { show: false }, axisLabel: { color: '#999' } },
+      { type: 'category', data: axis, gridIndex: 1, axisLine, axisTick: { show: false }, axisLabel: { color: T.label } },
     ],
     yAxis: [
-      { scale: true, gridIndex: 0, position: 'right', axisLine: { show: true, ...axisLine }, axisLabel: { color: '#ccc', formatter: (v) => v + '%' }, splitLine: split },
-      { gridIndex: 1, position: 'right', splitNumber: 2, axisLine: { show: true, ...axisLine }, axisLabel: { color: '#999' }, splitLine: split },
+      { scale: true, gridIndex: 0, position: 'right', axisLine: { show: true, ...axisLine }, axisLabel: { color: T.strong, formatter: (v) => v + '%' }, splitLine: split },
+      { gridIndex: 1, position: 'right', splitNumber: 2, axisLine: { show: true, ...axisLine }, axisLabel: { color: T.label }, splitLine: split },
     ],
     dataZoom: [
       { type: 'inside', xAxisIndex: [0, 1], startValue: s0, endValue: e0, minValueSpan: 10 },
       {
         type: 'slider', xAxisIndex: [0, 1], startValue: s0, endValue: e0, bottom: 6, height: 20,
-        borderColor: '#333', fillerColor: 'rgba(122,0,0,0.35)', textStyle: { color: '#888' },
-        dataBackground: { lineStyle: { color: '#555' }, areaStyle: { color: '#222' } },
-        handleStyle: { color: '#7a0000' }, moveHandleStyle: { color: '#7a0000' },
+        borderColor: T.slider, fillerColor: T.sliderFill, textStyle: { color: T.label },
+        dataBackground: { lineStyle: { color: '#E7A9C6' }, areaStyle: { color: '#FDECF3' } },
+        handleStyle: { color: T.handle, borderColor: T.handle }, moveHandleStyle: { color: T.handle },
       },
     ],
     series: [
       ...items.map(({ ix, color }, j) => ({
         id: 'p' + j, name: ix.name, type: 'line', data: pct[j], symbol: 'none', connectNulls: true,
         lineStyle: { width: 1.5, color }, itemStyle: { color },
-        markLine: j === 0 ? { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: '#666', type: 'solid' }, data: [{ yAxis: 0 }] } : undefined,
+        markLine: j === 0 ? { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: '#E3C6D6', type: 'solid' }, data: [{ yAxis: 0 }] } : undefined,
       })),
       ...items.map(({ ix, color }, j) => ({
         id: 'v' + j, name: ix.name, type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: ratio[j], symbol: 'none',
         lineStyle: { width: 1, color, opacity: 0.75 }, itemStyle: { color },
-        markLine: j === 0 ? { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: '#666', type: 'dashed' }, data: [{ yAxis: 1 }] } : undefined,
+        markLine: j === 0 ? { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: '#E3C6D6', type: 'dashed' }, data: [{ yAxis: 1 }] } : undefined,
       })),
     ],
   });
@@ -623,7 +628,7 @@ function renderStats() {
     c += `<tr><td>${a.name}</td>`;
     list.forEach((b, j) => {
       const v = i === j ? 1 : corr(rets[i], rets[j]);
-      const bg = v == null ? 'transparent' : v >= 0 ? `rgba(255,50,50,${(v * 0.7).toFixed(2)})` : `rgba(0,200,255,${(-v * 0.7).toFixed(2)})`;
+      const bg = v == null ? 'transparent' : v >= 0 ? `rgba(255,92,147,${(v * 0.75).toFixed(2)})` : `rgba(46,196,166,${(-v * 0.75).toFixed(2)})`;
       c += `<td style="background:${bg}">${v == null ? '-' : v.toFixed(2)}</td>`;
     });
     c += '</tr>';
