@@ -1,30 +1,30 @@
 'use strict';
 
 const T = {
-  bg: '#FFFFFF', axis: '#F4B6CF', grid: '#FBE3EE', label: '#9C8AA5', strong: '#6B5876',
-  pointer: '#C9A3E0', pointerBg: '#B57EDC', hollow: '#FFFFFF',
-  slider: '#FFD1E3', sliderFill: 'rgba(255,143,186,0.25)', handle: '#FF8FBA',
-  title: '#E8508E', muted: '#B9A8C4', hol: '#C08AE0', mark: '#E8508E', mv1: '#FFA41B', mv2: '#7B61FF',
-  sliderLine: '#E7A9C6', sliderArea: '#FDECF3', zero: '#E3C6D6',
-  tipBorder: '#F7C6DA', tipCss: 'border-radius:14px;box-shadow:0 6px 20px rgba(232,80,142,.18);',
-  corrPos: '255,92,147', corrNeg: '46,196,166', corrAlpha: 0.75,
+  bg: '#000', axis: '#8B0000', grid: '#2b0f0f', label: '#999', strong: '#ccc',
+  pointer: '#aaa', pointerBg: '#333', hollow: '#000',
+  slider: '#333', sliderFill: 'rgba(122,0,0,0.35)', handle: '#7a0000',
+  title: '#FFFF00', muted: '#999', hol: '#ffcc00', holText: '#000', mark: '#fff', mv1: '#FFFF00', mv2: '#FF00FF',
+  sliderLine: '#555', sliderArea: '#222', zero: '#666',
+  tipBorder: '#555', tipBg: 'rgba(20,20,20,0.92)', tipText: '#ddd',
+  corrPos: '255,50,50', corrNeg: '0,200,255', corrAlpha: 0.7,
 };
-const UP = '#FF5C93';
-const DOWN = '#2EC4A6';
-const MA_DEFS = [[5, '#7B61FF'], [10, '#FFA41B'], [20, '#FF4FA3'], [30, '#1FB89A'], [60, '#9AA0C0'], [120, '#3D9BFF'], [250, '#C08AE0']];
-const OVERLAY_COLORS = ['#FF4FA3', '#7B61FF', '#FFA41B', '#1FB89A', '#3D9BFF'];
+const UP = '#FF3232';
+const DOWN = '#00FFFF';
+const MA_DEFS = [[5, '#FFFFFF'], [10, '#FFFF00'], [20, '#FF00FF'], [30, '#00FF00'], [60, '#A0A0A0'], [120, '#00C8FF'], [250, '#C8C800']];
+const OVERLAY_COLORS = ['#FFFFFF', '#FFD700', '#FF4FD8', '#3CFF6B', '#3FA9FF'];
 const PRESETS = [['1M', '1个月'], ['3M', '3个月'], ['6M', '6个月'], ['YTD', '今年'], ['1Y', '1年'], ['2Y', '2年']];
 const MAX_COMPARE = 5;
 const WEEK = '日一二三四五六';
 
 const RICH = {
-  name: { color: T.title, fontSize: 14, fontWeight: 'bold' },
+  name: { color: T.title, fontSize: 13, fontWeight: 'bold' },
   code: { color: T.muted, fontSize: 12 },
   lab: { color: T.label, fontSize: 12 },
   up: { color: UP, fontSize: 12 },
   dn: { color: DOWN, fontSize: 12 },
   eq: { color: T.strong, fontSize: 12 },
-  hol: { color: '#fff', backgroundColor: T.hol, padding: [2, 6], borderRadius: 8, fontSize: 12 },
+  hol: { color: T.holText, backgroundColor: T.hol, padding: [1, 4], fontSize: 12 },
   vol: { color: T.strong, fontSize: 12 },
   mv1: { color: T.mv1, fontSize: 12 },
   mv2: { color: T.mv2, fontSize: 12 },
@@ -174,7 +174,7 @@ function createKChart(el, ix, axis, opt) {
       return {
         coord: [i, v], symbol: 'circle', symbolSize: 1,
         label: {
-          show: true, color: T.mark, fontSize: 12, fontWeight: 'bold',
+          show: true, color: T.mark, fontSize: 12,
           position: right ? 'left' : 'right', distance: 2,
           offset: [0, isHigh ? -2 : 2],
           formatter: right ? `${f2(v)} →` : `← ${f2(v)}`,
@@ -196,7 +196,7 @@ function createKChart(el, ix, axis, opt) {
       { id: 'pinfo', left: 8, top: 4, text: priceText(lastReal(e0)), textStyle: { rich: RICH, lineHeight: 18 } },
       { id: 'vinfo', left: 8, top: '67%', text: volText(lastReal(e0)), textStyle: { rich: RICH } },
     ],
-    axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: T.pointerBg, color: '#fff', borderRadius: 6 } },
+    axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: T.pointerBg, color: '#fff' } },
     tooltip: {
       trigger: 'axis', showContent: false,
       axisPointer: { type: 'cross', lineStyle: { color: T.pointer, type: 'dashed' }, crossStyle: { color: T.pointer, type: 'dashed' } },
@@ -316,21 +316,21 @@ function createOverlay(el, list, axis, opt) {
   chart.setOption({
     backgroundColor: T.bg,
     animation: false,
-    legend: { top: 8, left: 8, textStyle: { color: T.strong }, itemWidth: 18, itemHeight: 4, data: items.map((it) => it.ix.name) },
+    legend: { top: 8, left: 8, textStyle: { color: T.strong }, itemWidth: 18, itemHeight: 3, data: items.map((it) => it.ix.name) },
     title: [
       { text: '区间累计涨跌幅（区间第一天 = 0%）', right: 72, top: 8, textStyle: { color: T.label, fontSize: 12, fontWeight: 'normal' } },
       { text: '成交量 ÷ 区间日均成交量（1.0 = 平均水平）', left: 8, top: '67%', textStyle: { color: T.label, fontSize: 12, fontWeight: 'normal' } },
     ],
-    axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: T.pointerBg, color: '#fff', borderRadius: 6 } },
+    axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: T.pointerBg, color: '#fff' } },
     tooltip: {
-      trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.96)', borderColor: T.tipBorder, borderWidth: 1, extraCssText: T.tipCss, textStyle: { color: T.strong, fontSize: 12 },
+      trigger: 'axis', backgroundColor: T.tipBg, borderColor: T.tipBorder, textStyle: { color: T.tipText, fontSize: 12 },
       axisPointer: { type: 'cross', lineStyle: { color: T.pointer, type: 'dashed' }, crossStyle: { color: T.pointer, type: 'dashed' } },
       formatter(params) {
         const i = params[0].dataIndex;
         let h = `<b>${axis[i]} 周${weekday(axis[i])}</b><table style="margin-top:4px">`;
         items.forEach(({ ix, at, ff, color }, j) => {
           const p = pct[j][i];
-          const c = p == null ? T.strong : p >= 0 ? UP : DOWN;
+          const c = p == null ? T.tipText : p >= 0 ? UP : DOWN;
           const hol = at[i] < 0 ? ` <span style="color:${T.hol}">休市</span>` : '';
           h += `<tr><td><span style="color:${color}">●</span> ${ix.name}</td>`
             + `<td style="text-align:right;color:${c};padding-left:12px">${p == null ? '-' : (p >= 0 ? '+' : '') + p.toFixed(2) + '%'}</td>`
