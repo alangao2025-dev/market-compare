@@ -1,0 +1,62 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER: npx --yes wrangler@4
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci
+          elif [ -f package.json ]; then npm install
+          fi
+
+      # Create missing D1 databases, write their real ids into wrangler.json, apply migrations
+      - name: Resolve D1 databases
+        run: |
+          count=$(jq '.d1_databases // [] | length' wrangler.json)
+          [ "$count" -gt 0 ] || { echo "No D1 databases"; exit 0; }
+          existing=$($WRANGLER d1 list --json)
+          for i in $(seq 0 $((count - 1))); do
+            name=$(jq -r ".d1_databases[$i].database_name" wrangler.json)
+            id=$(echo "$existing" | jq -r --arg n "$name" '.[] | select(.name==$n) | .uuid')
+            if [ -z "$id" ]; then
+              $WRANGLER d1 create "$name"
+              id=$($WRANGLER d1 list --json | jq -r --arg n "$name" '.[] | select(.name==$n) | .uuid')
+            fi
+            echo "D1 $name = $id"
+            jq --argjson i "$i" --arg id "$id" '.d1_databases[$i].database_id = $id' wrangler.json > wrangler.tmp && mv wrangler.tmp wrangler.json
+            dir=$(jq -r ".d1_databases[$i].migrations_dir // \"migrations\"" wrangler.json)
+            if ls "$dir"/*.sql >/dev/null 2>&1; then $WRANGLER d1 migrations apply "$name" --remote; fi
+          done
+
+      - name: Build
+        run: |
+          if [ -f open-next.config.ts ]; then
+            $WRANGLER types --env-interface CloudflareEnv cloudflare-env.d.ts
+            npx opennextjs-cloudflare build
+          elif [ -f package.json ] && jq -e '.scripts.build' package.json >/dev/null; then
+            npm run build
+          else
+            echo "No build step"
+          fi
+
+      - run: $WRANGLER deploy

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全球指数日K对比</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>全球指数日K对比 <span class="tag">原型</span></h1>
+  <div class="updated">数据截至 <b id="updated">-</b></div>
+</header>
+
+<section class="toolbar">
+  <div class="row">
+    <div class="seg" id="modeSeg">
+      <button data-mode="single">单指数</button>
+      <button data-mode="compare">多市场对比</button>
+    </div>
+    <div class="seg" id="viewSeg">
+      <button data-view="grid">多图联动</button>
+      <button data-view="overlay">走势叠加</button>
+    </div>
+    <span class="hint" id="pickHint"></span>
+  </div>
+  <div class="row" id="chips"></div>
+  <div class="row">
+    <div class="seg" id="presetSeg"></div>
+    <label class="date">从 <input type="date" id="from"></label>
+    <label class="date">到 <input type="date" id="to"></label>
+    <span class="hint">滚轮/↑↓ 缩放 · 拖动平移 · ←→ 逐日移动光标 · Esc 取消光标</span>
+  </div>
+</section>
+
+<main id="charts"></main>
+
+<section class="panel" id="statsPanel">
+  <h2>区间统计 <small id="statsRange"></small></h2>
+  <div class="scroll"><table id="stats"></table></div>
+  <div id="corrWrap">
+    <h2>日收益率相关系数</h2>
+    <div class="scroll"><table id="corr"></table></div>
+  </div>
+</section>
+
+<footer class="note">
+  数据来源：A股（腾讯行情，成交量单位：手），其他市场（Yahoo Finance）。日期均为各市场本地日期；美股收盘时亚洲已是次日，同一日期并非同一时刻，比较相关系数时请注意。
+  多图联动中某市场休市的日期留空，走势叠加中休市日沿用前一交易日收盘价。
+</footer>
+
+<div id="toast"></div>
+<script src="echarts.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
