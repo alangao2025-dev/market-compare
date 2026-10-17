@@ -4,6 +4,10 @@ const T = {
   bg: '#FFFFFF', axis: '#F4B6CF', grid: '#FBE3EE', label: '#9C8AA5', strong: '#6B5876',
   pointer: '#C9A3E0', pointerBg: '#B57EDC', hollow: '#FFFFFF',
   slider: '#FFD1E3', sliderFill: 'rgba(255,143,186,0.25)', handle: '#FF8FBA',
+  title: '#E8508E', muted: '#B9A8C4', hol: '#C08AE0', mark: '#E8508E', mv1: '#FFA41B', mv2: '#7B61FF',
+  sliderLine: '#E7A9C6', sliderArea: '#FDECF3', zero: '#E3C6D6',
+  tipBorder: '#F7C6DA', tipCss: 'border-radius:14px;box-shadow:0 6px 20px rgba(232,80,142,.18);',
+  corrPos: '255,92,147', corrNeg: '46,196,166', corrAlpha: 0.75,
 };
 const UP = '#FF5C93';
 const DOWN = '#2EC4A6';
@@ -14,16 +18,16 @@ const MAX_COMPARE = 5;
 const WEEK = '日一二三四五六';
 
 const RICH = {
-  name: { color: '#E8508E', fontSize: 14, fontWeight: 'bold' },
-  code: { color: '#B9A8C4', fontSize: 12 },
-  lab: { color: '#9C8AA5', fontSize: 12 },
+  name: { color: T.title, fontSize: 14, fontWeight: 'bold' },
+  code: { color: T.muted, fontSize: 12 },
+  lab: { color: T.label, fontSize: 12 },
   up: { color: UP, fontSize: 12 },
   dn: { color: DOWN, fontSize: 12 },
-  eq: { color: '#6B5876', fontSize: 12 },
-  hol: { color: '#fff', backgroundColor: '#C08AE0', padding: [2, 6], borderRadius: 8, fontSize: 12 },
-  vol: { color: '#6B5876', fontSize: 12 },
-  mv1: { color: '#FFA41B', fontSize: 12 },
-  mv2: { color: '#7B61FF', fontSize: 12 },
+  eq: { color: T.strong, fontSize: 12 },
+  hol: { color: '#fff', backgroundColor: T.hol, padding: [2, 6], borderRadius: 8, fontSize: 12 },
+  vol: { color: T.strong, fontSize: 12 },
+  mv1: { color: T.mv1, fontSize: 12 },
+  mv2: { color: T.mv2, fontSize: 12 },
 };
 MA_DEFS.forEach(([, c], j) => { RICH['m' + j] = { color: c, fontSize: 12 }; });
 
@@ -170,7 +174,7 @@ function createKChart(el, ix, axis, opt) {
       return {
         coord: [i, v], symbol: 'circle', symbolSize: 1,
         label: {
-          show: true, color: '#E8508E', fontSize: 12, fontWeight: 'bold',
+          show: true, color: T.mark, fontSize: 12, fontWeight: 'bold',
           position: right ? 'left' : 'right', distance: 2,
           offset: [0, isHigh ? -2 : 2],
           formatter: right ? `${f2(v)} →` : `← ${f2(v)}`,
@@ -214,7 +218,7 @@ function createKChart(el, ix, axis, opt) {
       ...(opt.slider ? [{
         type: 'slider', xAxisIndex: [0, 1], startValue: s0, endValue: e0, bottom: 6, height: 20,
         borderColor: T.slider, fillerColor: T.sliderFill, textStyle: { color: T.label },
-        dataBackground: { lineStyle: { color: '#E7A9C6' }, areaStyle: { color: '#FDECF3' } },
+        dataBackground: { lineStyle: { color: T.sliderLine }, areaStyle: { color: T.sliderArea } },
         handleStyle: { color: T.handle, borderColor: T.handle }, moveHandleStyle: { color: T.handle },
       }] : []),
     ],
@@ -229,8 +233,8 @@ function createKChart(el, ix, axis, opt) {
         lineStyle: { width: 1, color: c }, itemStyle: { color: c }, silent: true,
       })),
       { name: 'VOL', type: 'bar', xAxisIndex: 1, yAxisIndex: 1, data: vol, barMaxWidth: 14 },
-      { name: 'MAVOL1', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: pick(D.mv5), symbol: 'none', connectNulls: true, lineStyle: { width: 1, color: '#FFA41B' }, silent: true },
-      { name: 'MAVOL2', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: pick(D.mv10), symbol: 'none', connectNulls: true, lineStyle: { width: 1, color: '#7B61FF' }, silent: true },
+      { name: 'MAVOL1', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: pick(D.mv5), symbol: 'none', connectNulls: true, lineStyle: { width: 1, color: T.mv1 }, silent: true },
+      { name: 'MAVOL2', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: pick(D.mv10), symbol: 'none', connectNulls: true, lineStyle: { width: 1, color: T.mv2 }, silent: true },
       // 每天都有值的隐藏序列，用来在休市日也能定位十字光标
       { id: 'cursor', type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: axis.map(() => 0), symbol: 'none', silent: true, lineStyle: { opacity: 0 } },
     ],
@@ -319,7 +323,7 @@ function createOverlay(el, list, axis, opt) {
     ],
     axisPointer: { link: [{ xAxisIndex: 'all' }], label: { backgroundColor: T.pointerBg, color: '#fff', borderRadius: 6 } },
     tooltip: {
-      trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.96)', borderColor: '#F7C6DA', borderWidth: 1, extraCssText: 'border-radius:14px;box-shadow:0 6px 20px rgba(232,80,142,.18);', textStyle: { color: T.strong, fontSize: 12 },
+      trigger: 'axis', backgroundColor: 'rgba(255,255,255,0.96)', borderColor: T.tipBorder, borderWidth: 1, extraCssText: T.tipCss, textStyle: { color: T.strong, fontSize: 12 },
       axisPointer: { type: 'cross', lineStyle: { color: T.pointer, type: 'dashed' }, crossStyle: { color: T.pointer, type: 'dashed' } },
       formatter(params) {
         const i = params[0].dataIndex;
@@ -327,11 +331,11 @@ function createOverlay(el, list, axis, opt) {
         items.forEach(({ ix, at, ff, color }, j) => {
           const p = pct[j][i];
           const c = p == null ? T.strong : p >= 0 ? UP : DOWN;
-          const hol = at[i] < 0 ? ' <span style="color:#C08AE0">休市</span>' : '';
+          const hol = at[i] < 0 ? ` <span style="color:${T.hol}">休市</span>` : '';
           h += `<tr><td><span style="color:${color}">●</span> ${ix.name}</td>`
             + `<td style="text-align:right;color:${c};padding-left:12px">${p == null ? '-' : (p >= 0 ? '+' : '') + p.toFixed(2) + '%'}</td>`
             + `<td style="text-align:right;padding-left:12px">${f2(ff[i])}${hol}</td>`
-            + `<td style="text-align:right;padding-left:12px;color:#9C8AA5">量比 ${ratio[j][i] == null ? '-' : ratio[j][i].toFixed(2)}</td></tr>`;
+            + `<td style="text-align:right;padding-left:12px;color:${T.label}">量比 ${ratio[j][i] == null ? '-' : ratio[j][i].toFixed(2)}</td></tr>`;
         });
         return h + '</table>';
       },
@@ -353,7 +357,7 @@ function createOverlay(el, list, axis, opt) {
       {
         type: 'slider', xAxisIndex: [0, 1], startValue: s0, endValue: e0, bottom: 6, height: 20,
         borderColor: T.slider, fillerColor: T.sliderFill, textStyle: { color: T.label },
-        dataBackground: { lineStyle: { color: '#E7A9C6' }, areaStyle: { color: '#FDECF3' } },
+        dataBackground: { lineStyle: { color: T.sliderLine }, areaStyle: { color: T.sliderArea } },
         handleStyle: { color: T.handle, borderColor: T.handle }, moveHandleStyle: { color: T.handle },
       },
     ],
@@ -361,12 +365,12 @@ function createOverlay(el, list, axis, opt) {
       ...items.map(({ ix, color }, j) => ({
         id: 'p' + j, name: ix.name, type: 'line', data: pct[j], symbol: 'none', connectNulls: true,
         lineStyle: { width: 1.5, color }, itemStyle: { color },
-        markLine: j === 0 ? { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: '#E3C6D6', type: 'solid' }, data: [{ yAxis: 0 }] } : undefined,
+        markLine: j === 0 ? { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: T.zero, type: 'solid' }, data: [{ yAxis: 0 }] } : undefined,
       })),
       ...items.map(({ ix, color }, j) => ({
         id: 'v' + j, name: ix.name, type: 'line', xAxisIndex: 1, yAxisIndex: 1, data: ratio[j], symbol: 'none',
         lineStyle: { width: 1, color, opacity: 0.75 }, itemStyle: { color },
-        markLine: j === 0 ? { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: '#E3C6D6', type: 'dashed' }, data: [{ yAxis: 1 }] } : undefined,
+        markLine: j === 0 ? { silent: true, symbol: 'none', label: { show: false }, lineStyle: { color: T.zero, type: 'dashed' }, data: [{ yAxis: 1 }] } : undefined,
       })),
     ],
   });
@@ -628,7 +632,7 @@ function renderStats() {
     c += `<tr><td>${a.name}</td>`;
     list.forEach((b, j) => {
       const v = i === j ? 1 : corr(rets[i], rets[j]);
-      const bg = v == null ? 'transparent' : v >= 0 ? `rgba(255,92,147,${(v * 0.75).toFixed(2)})` : `rgba(46,196,166,${(-v * 0.75).toFixed(2)})`;
+      const bg = v == null ? 'transparent' : v >= 0 ? `rgba(${T.corrPos},${(v * T.corrAlpha).toFixed(2)})` : `rgba(${T.corrNeg},${(-v * T.corrAlpha).toFixed(2)})`;
       c += `<td style="background:${bg}">${v == null ? '-' : v.toFixed(2)}</td>`;
     });
     c += '</tr>';
