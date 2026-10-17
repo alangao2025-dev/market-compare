@@ -506,33 +506,26 @@ function renderUI() {
   document.querySelectorAll('#modeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.mode === state.mode));
   $('#viewSeg').hidden = state.mode !== 'compare';
   document.querySelectorAll('#viewSeg button').forEach((b) => b.classList.toggle('on', b.dataset.view === state.view));
-  $('#pickHint').textContent = state.mode === 'compare' ? `勾选 2–5 个指数对比 · 已选 ${state.selected.length}/${MAX_COMPARE}` : '点击指数查看日K线';
+  $('#pickHint').textContent = state.mode === 'compare' ? `已选 ${state.selected.length} / ${MAX_COMPARE}` : '';
 
-  const list = $('#list');
-  list.className = state.mode;
-  list.innerHTML = '';
+  const chips = $('#chips');
+  chips.innerHTML = '';
   const markets = [...new Set(ORDER.map((k) => IDX[k].market))];
   markets.forEach((m) => {
-    const h = document.createElement('div');
-    h.className = 'mkt';
-    h.textContent = m;
-    list.appendChild(h);
+    const g = document.createElement('div');
+    g.className = 'group';
+    g.innerHTML = `<span>${m}</span>`;
     ORDER.filter((k) => IDX[k].market === m).forEach((k) => {
-      const ix = IDX[k];
-      const rows = ix.d.rows, last = rows[rows.length - 1];
-      const pct = (last[4] / ix.d.prev[rows.length - 1] - 1) * 100;
-      const c = pct > 0 ? 'up' : pct < 0 ? 'dn' : '';
-      const ci = state.selected.indexOf(k);
-      const on = state.mode === 'single' ? state.single === k : ci >= 0;
       const b = document.createElement('button');
-      b.className = 'item' + (on ? ' on' : '');
-      b.title = `${ix.name} ${ix.code}`;
-      b.innerHTML = `<span class="box" style="${on && state.mode === 'compare' ? 'background:' + (state.view === 'overlay' ? OVERLAY_COLORS[ci] : '#ff3232') : ''}"></span>`
-        + `<span class="nm">${ix.name}</span>`
-        + `<span class="px ${c}">${f2(last[4])}<small>${pct > 0 ? '+' : ''}${pct.toFixed(2)}%</small></span>`;
+      const on = state.mode === 'single' ? state.single === k : state.selected.includes(k);
+      b.className = 'chip' + (on ? ' on' : '');
+      const ci = state.selected.indexOf(k);
+      const showDot = state.mode === 'compare' && state.view === 'overlay' && ci >= 0;
+      b.innerHTML = `<i style="background:${showDot ? OVERLAY_COLORS[ci] : 'transparent'};display:${showDot ? 'inline-block' : 'none'}"></i>${IDX[k].name}`;
       b.onclick = () => pickIndex(k);
-      list.appendChild(b);
+      g.appendChild(b);
     });
+    chips.appendChild(g);
   });
   syncRangeUI();
 }
